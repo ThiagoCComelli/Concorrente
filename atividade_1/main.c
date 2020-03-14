@@ -8,58 +8,58 @@
 void init_buffer(buffer_t* b, int capacity0) {
     b->capacity = capacity0;
     b->size = 0;
+    b->put_idx = 0;
+    b->take_idx = 0;
+    b->data = (int*) malloc(capacity0 * sizeof(int));
+
 }
 
 /// Libera a memória e quaisquer recursos de propriedade de b. Desfaz o
 /// init_buffer()
 void destroy_buffer(buffer_t* b) {
+    free(b->data);
 }
 
 /// Retorna o valor do elemento mais antigo do buffer b, ou retorna -1 se o
 /// buffer estiver vazio
 int take_buffer(buffer_t* b) {
-    return 0;
+    int num;
+    if(b->size > 0){
+        num = b->data[b->take_idx];
+        b->data[b->take_idx] = -2;
+        b->take_idx++;
+        b->size--;
+        if (b->take_idx >= b->capacity){
+            b->take_idx = 0;
+        }
+    } else {
+        return -1;
+    }
+    return num;
 }
 
 /// Adiciona um elemento ao buffer e retorna 0, ou retorna -1 sem
 /// alterar o buffer se não houver espaço livre
 int put_buffer(buffer_t* b, int val) {
-    b->size++;
+    if(b->size < b->capacity){
+        b->data[b->put_idx] = val;
+        b->size++;
+        b->put_idx++;
+        if(b->put_idx >= b->capacity){
+            b->put_idx = 0;
+        }
+
+    } else {
+        return -1;
+    }
+
     return 0;
 }
 
 /// Lê um comando do terminal e o executa. Retorna 1 se o comando era
 /// um comando normal. No caso do comando de terminar o programa,
 /// retorna 0
-int ler_comando(buffer_t* b){
-    char op;
-    int num;
-
-    while (1)
-    {
-        printf("Comandos:\nr: retirar\nc: colocar\nq: sair\n");
-        scanf("%c\n",&op);
-
-        if(op=='q'){
-            break;
-        } else if (op=='r'){
-            take_buffer(b);
-            return 1;
-        } else if (op=='c'){
-
-            printf("%d\n",b->size);
-            scanf("%d\n",&num);
-
-            put_buffer(b,num);
-            printf("%d\n",b->size);
-            return 1;
-
-        } else {
-            return 0;
-        }
-    }
-    return 1;
-}
+int ler_comando(buffer_t* b);
 
 int main(int argc, char **argv) {
 
@@ -73,8 +73,13 @@ int main(int argc, char **argv) {
 
     init_buffer(&b, capacity);
 
-    ler_comando(&b);
-    
+    printf("Comandos:\n"
+           "r: retirar\n"
+           "c: colocar\n"
+           "q: sair\n\n");
+
+    while(ler_comando(&b));
+
     //////////////////////////////////////////////////
     // Chamar ler_comando() até a função retornar 0 //
     //////////////////////////////////////////////////

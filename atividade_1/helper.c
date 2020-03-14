@@ -24,6 +24,7 @@ void dump_buffer(buffer_t* b) {
  ***************************************************************/
 
 int ler_comando(buffer_t* b) {
+    //printf("put %d take %d size %d\n",b->put_idx,b->take_idx,b->size);
     printf(">");
     fflush(stdout);
     char cmd;
