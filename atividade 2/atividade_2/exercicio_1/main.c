@@ -31,7 +31,6 @@ int main(int argc, char** argv) {
      * 2. Faça os prints exatamente como solicitado. *
      * 3. Espere o término dos filhos                *
      *************************************************/
-    int j;
     pid_t pid;
     pid = fork();
 

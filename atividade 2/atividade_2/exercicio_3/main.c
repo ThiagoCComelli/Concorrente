@@ -1,4 +1,9 @@
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <stdio.h>
+#include <string.h>
 
 //        (pai)
 //          |
@@ -34,6 +39,56 @@ int main(int argc, char** argv) {
      * 2. Faça os prints exatamente como solicitado. *
      * 3. Espere o término dos filhos                *
      *************************************************/
+
+    pid_t pid;
+    int status;
+
+    fflush(stdout);
+    pid = fork();
+
+    if(pid < 0){
+        return 1;
+    } else if (pid == 0){
+        printf("sed PID %d iniciado\n",getpid());
+
+        fflush(stdout);
+        execlp("sed","sed","-i","-e","s/silver/axamantium/g;s/adamantium/silver/g;s/axamantium/adamantium/g","text",NULL);
+       
+        exit(0);
+    } else {
+        while (wait(NULL) > 0){
+        }
+
+        fflush(stdout);
+        pid = fork();
+
+        if(pid < 0){
+            return 1;
+        } else if (pid == 0){
+            printf("grep PID %d iniciado\n",getpid());
+
+            fflush(stdout);
+            if(execlp("grep","grep","adamantium","text",NULL)){
+                exit(0);
+            } else {
+                exit(1);
+            }
+        } else {
+            while (wait(&status) > 0){
+            }
+
+            if (WIFEXITED(status)) {
+                if(WEXITSTATUS(status)){
+                    printf("grep retornou com código %d, não encontrou adamantium\n",WEXITSTATUS(status));
+                } else {
+                    printf("grep retornou com código 0, encontrou adamantium\n");
+                }
+            }
+        }
+        
+    }
+
+
     
     return 0;
 }
