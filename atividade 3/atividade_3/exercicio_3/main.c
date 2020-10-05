@@ -5,6 +5,30 @@
 #include <stdio.h>
 #include <pthread.h>
 
+typedef struct numbersStruct{
+    double* array_numbersA;
+    double* array_numbersB;
+    double result;
+    int start;
+    int end;
+    
+} numbersStruct;
+
+void *somador(void *arg){
+    numbersStruct *numbersArg;
+    numbersArg = (numbersStruct *)arg;
+
+    // printf("%p \n\n",numbersArg->adress);
+
+    for (int i = numbersArg->start; i < numbersArg->end; i++)
+    {
+        numbersArg->result += (numbersArg->array_numbersA[i] * numbersArg->array_numbersB[i]);
+    }
+    
+
+    pthread_exit(NULL);
+}
+
 // Lê o conteúdo do arquivo filename e retorna um vetor E o tamanho dele
 // Se filename for da forma "gen:%d", gera um vetor aleatório com %d elementos
 //
@@ -61,8 +85,48 @@ int main(int argc, char* argv[]) {
 
     //Calcula produto escalar. Paralelize essa parte
     double result = 0;
-    for (int i = 0; i < a_size; ++i) 
-        result += a[i] * b[i];
+
+    // Calcula com uma thread só. Programador original só deixou a leitura 
+    // do argumento e fugiu pro caribe. É essa computação que você precisa 
+    // paralelizar
+
+    if(n_threads > a_size){
+        n_threads = a_size;
+    }
+
+    numbersStruct *numbers[n_threads];
+    pthread_t t[n_threads];
+
+    for(int i = 0; i < n_threads; i++){
+        numbers[i] = malloc(sizeof(numbersStruct));
+        numbers[i]->array_numbersA = a;
+        numbers[i]->array_numbersB = b;
+        numbers[i]->result = 0;
+        numbers[i]->start = i*(int)(a_size/n_threads);
+
+
+        if (i == (n_threads - 1)){
+            numbers[i]->end = a_size;
+        } else {
+            numbers[i]->end = numbers[i]->start + (int)(a_size/n_threads);
+        }
+    }
+
+    for (int i = 0; i < n_threads; i++)
+    {
+        pthread_create(&t[i],NULL,somador,(void *) numbers[i]);
+    }
+
+    for (int i = 0; i < n_threads; i++)
+    {
+        pthread_join(t[i],NULL);
+    }
+
+    for (int i = 0; i < n_threads; ++i){
+        result += numbers[i]->result;
+        free(numbers[i]);
+    }
+        
     
     //    +---------------------------------+
     // ** | IMPORTANTE: avalia o resultado! | **
