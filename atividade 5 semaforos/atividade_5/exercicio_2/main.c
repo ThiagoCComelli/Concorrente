@@ -15,8 +15,8 @@ void *consumidor_func(void *arg);
 int indice_produtor, indice_consumidor, tamanho_buffer;
 int* buffer;
 
-sem_t semEmpty;
-sem_t semFull;
+sem_t sem0;
+sem_t sem1;
 
 pthread_mutex_t mutex0;
 pthread_mutex_t mutex1;
@@ -36,14 +36,14 @@ void *produtor_func(void *arg) {
         else 
             produto = produzir(i); //produz um elemento normal
         
-        sem_wait(&semEmpty);
+        sem_wait(&sem0);
         pthread_mutex_lock(&mutex0);
 
         indice_produtor = (indice_produtor + 1) % tamanho_buffer; //calcula posição próximo elemento
         buffer[indice_produtor] = produto; //adiciona o elemento produzido à lista
 
         pthread_mutex_unlock(&mutex0);
-        sem_post(&semFull);
+        sem_post(&sem1);
 
     }
     return NULL;
@@ -51,14 +51,14 @@ void *produtor_func(void *arg) {
 
 void *consumidor_func(void *arg) {
     while (1) {
-        sem_wait(&semFull);
+        sem_wait(&sem1);
         pthread_mutex_lock(&mutex1);
 
         indice_consumidor = (indice_consumidor + 1) % tamanho_buffer; //Calcula o próximo item a consumir
         int produto = buffer[indice_consumidor]; //obtém o item da lista
 
         pthread_mutex_unlock(&mutex1);
-        sem_post(&semEmpty);
+        sem_post(&sem0);
 
         //Podemos receber um produto normal ou um produto especial
         if (produto >= 0){
@@ -92,8 +92,8 @@ int main(int argc, char *argv[]) {
     pthread_t produtores[n_produtores];
     pthread_t consumidores[n_consumidores];
 
-    sem_init(&semEmpty,0,tamanho_buffer - 1);
-    sem_init(&semFull,0,0);
+    sem_init(&sem0,0,tamanho_buffer - 1);
+    sem_init(&sem1,0,0);
 
     pthread_mutex_init(&mutex0,NULL);
     pthread_mutex_init(&mutex1,NULL);
@@ -125,8 +125,8 @@ int main(int argc, char *argv[]) {
     //Libera memória do buffer
     free(buffer);
 
-    sem_destroy(&semEmpty);
-    sem_destroy(&semFull);
+    sem_destroy(&sem0);
+    sem_destroy(&sem1);
 
     pthread_mutex_destroy(&mutex0);
     pthread_mutex_destroy(&mutex1);

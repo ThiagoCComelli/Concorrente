@@ -5,8 +5,8 @@
 #include <pthread.h>
 #include <time.h>
 #include <semaphore.h>
-#include "helper.c"
-
+// #include "helper.c"
+// 
 int produzir(int value);    //< definida em helper.c
 void consumir(int produto); //< definida em helper.c
 void *produtor_func(void *arg);
@@ -16,6 +16,7 @@ int indice_produtor, indice_consumidor, tamanho_buffer;
 int* buffer;
 
 sem_t sem0;
+sem_t sem1;
 
 //Você deve fazer as alterações necessárias nesta função e na função
 //consumidor_func para que usem semáforos para coordenar a produção
@@ -24,19 +25,22 @@ void *produtor_func(void *arg) {
     //arg contem o número de itens a serem produzidos
     int max = *((int*)arg);
 
-    sem_wait(&sem0);
     for (int i = 0; i <= max; ++i) {
         int produto;
+
+        sem_wait(&sem0);
+
         if (i == max){
             produto = -1;          //envia produto sinlizando FIM
-            sem_post(&sem0);
         }
-        else 
+        else {
             produto = produzir(i); //produz um elemento normal
+        }
         indice_produtor = (indice_produtor + 1) % tamanho_buffer; //calcula posição próximo elemento
 
         buffer[indice_produtor] = produto; //adiciona o elemento produzido à lista
         
+        sem_post(&sem1);
     }
 
     return NULL;
@@ -45,15 +49,18 @@ void *produtor_func(void *arg) {
 void *consumidor_func(void *arg) {
 
     while (1) {
-        sem_wait(&sem0);
+        sem_wait(&sem1);    
+
         indice_consumidor = (indice_consumidor + 1) % tamanho_buffer; //Calcula o próximo item a consumir
         
         int produto = buffer[indice_consumidor]; //obtém o item da lista
-        sem_post(&sem0);
+
+        sem_post(&sem0);                
 
         //Podemos receber um produto normal ou um produto especial
-        if (produto >= 0)
+        if (produto >= 0){
             consumir(produto); //Consome o item obtido.
+        }
         else
             break; //produto < 0 é um sinal de que o consumidor deve parar
     }
@@ -84,6 +91,7 @@ int main(int argc, char *argv[]) {
 
     pthread_t threads[2];
     sem_init(&sem0,0,1);    
+    sem_init(&sem1,0,0);    
 
     pthread_create(&threads[0], NULL, produtor_func, (void *)loops);
     pthread_create(&threads[1], NULL, consumidor_func, NULL);
@@ -92,6 +100,7 @@ int main(int argc, char *argv[]) {
         pthread_join(threads[i], NULL);
 
     sem_destroy(&sem0);
+    sem_destroy(&sem1);
 
     //Libera memória do buffer
     free(buffer);
