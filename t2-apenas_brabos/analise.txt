@@ -1,0 +1,31 @@
+            PROCESSOS   |   THREADS   |          TEMPO(ms)
+QUANTIDADE       1      |      1      |      0.1613142490386963
+QUANTIDADE       2      |      1      |      0.11340713500976562
+QUANTIDADE       3      |      1      |      0.10438251495361328
+QUANTIDADE       4      |      1      |      0.09799575805664062
+QUANTIDADE       5      |      1      |      0.09449100494384766 <-- Melhor desepenho de todos os casos
+QUANTIDADE       6      |      1      |      0.09663558006286621
+QUANTIDADE       7      |      1      |      0.100616455078125
+
+            PROCESSOS   |   THREADS   |          TEMPO(ms)
+QUANTIDADE       1      |      1      |      0.1613142490386963 <-- Melhor desempenho
+QUANTIDADE       1      |      2      |      0.1874711513519287
+QUANTIDADE       1      |      3      |      0.23647713661193848
+QUANTIDADE       1      |      4      |      0.27298688888549805
+QUANTIDADE       1      |      5      |      0.3174629211425781
+QUANTIDADE       1      |      6      |      0.3609352111816406
+QUANTIDADE       1      |      7      |      0.39988088607788086
+
+            PROCESSOS   |   THREADS   |          TEMPO(ms)
+QUANTIDADE       2      |      1      |      0.11340713500976562 <-- Melhor desempenho
+QUANTIDADE       2      |      2      |      0.12974810600280762
+QUANTIDADE       2      |      3      |      0.14951801300048828
+QUANTIDADE       2      |      4      |      0.1629340648651123
+QUANTIDADE       2      |      5      |      0.17163586616516113
+QUANTIDADE       2      |      6      |      0.20961236953735352
+QUANTIDADE       2      |      7      |      0.2186424732208252
+
+=======================================================================================================
+
+1.54 paralela 6 processos 1 thread
+5.01 sequencial
